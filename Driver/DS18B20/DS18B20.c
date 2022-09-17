@@ -1,11 +1,8 @@
 #include "DS18B20.h"
-#include "timer.h"	
-#include "delay.h"
-
-#define PROCESS_SUCCEED			(0)
-#define PROCESS_FAILURE			(-1)
-
+#include "timer.h"
+#include "util.h"
 #define USING_TIM3
+
 
 //IO方向设置
 #define DS18B20_IO_IN()  {GPIOG->CRH&=0XFFFF0FFF;GPIOG->CRH|=8<<12;}
@@ -31,7 +28,7 @@ static void DS18B20_Rst(void)
 	timer_delay_us(15);    	
 #else 
 	delay_us(15);			//15US
-#endif  	
+#endif 
 }
 //等待DS18B20的回应
 //返回-1:未检测到DS18B20的存在
@@ -171,7 +168,7 @@ u8 DS18B20_Init(void)
  	GPIO_Init(GPIOG, &GPIO_InitStructure);
 
  	GPIO_SetBits(GPIOG,GPIO_Pin_11);    //输出1
-
+	
 	DS18B20_Rst();
 
 	return DS18B20_Check();
@@ -181,12 +178,15 @@ u8 DS18B20_Init(void)
 //返回值：温度值 （-550~1250） 
 short DS18B20_Get_Temp(void)
 {
+	static short valid_temp = 0;
     u8 temp;
     u8 TL,TH;
 	short tem;
     DS18B20_Start ();  			// ds1820 start convert
     DS18B20_Rst();
-    DS18B20_Check();	 
+
+    DS18B20_Check();
+	
     DS18B20_Write_Byte(0xcc);	// skip rom
     DS18B20_Write_Byte(0xbe);	// convert	    
     TL=DS18B20_Read_Byte(); 	// LSB   
@@ -201,9 +201,13 @@ short DS18B20_Get_Temp(void)
     tem=TH; 					//获得高八位
     tem<<=8;    
     tem+=TL;					//获得底八位
-    tem=(float)tem*0.625;		//转换     
-	if(temp)return tem; 		//返回温度值
-	else return -tem;    
+	//去除85度这个异常状态
+	if(tem != 0x550){
+		valid_temp = tem;
+	}	
+    valid_temp=(float)valid_temp*0.625;		//转换
+	if(temp)return valid_temp; 		//返回温度值
+	else return -valid_temp;    
 }
 
 
