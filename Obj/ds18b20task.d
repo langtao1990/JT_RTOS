@@ -43,3 +43,4 @@
 .\obj\ds18b20task.o: .\FreeRTOS\include\mpu_wrappers.h
 .\obj\ds18b20task.o: .\FreeRTOS\include\task.h
 .\obj\ds18b20task.o: .\FreeRTOS\include\list.h
+.\obj\ds18b20task.o: .\Driver\util\util.h

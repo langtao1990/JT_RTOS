@@ -4,7 +4,7 @@
 #include "sys.h"
 #include "APPTaskDef.h"
 #include "timer.h"
-
+#include "oled.h"
 
 #define TIMER_CNT_NTIMES		(1)	//timer计数到N
 #define TIMER_CNT_PERIOD		(72 - 1)  	//72M/72 = 1M
@@ -20,9 +20,9 @@ int main(void)
 	init_key();							//初始化key
 	TIM3_Int_Init(TIMER_CNT_NTIMES,TIMER_CNT_PERIOD);//1Mhz的计数频率
 	
-	
+	oled_init();
 	//2.初始化thread
-	APP_task();
+	//APP_task();
 	
 	return 0;
 }

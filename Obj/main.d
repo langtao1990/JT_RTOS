@@ -46,3 +46,4 @@
 .\obj\main.o: .\FreeRTOS\include\task.h
 .\obj\main.o: .\FreeRTOS\include\list.h
 .\obj\main.o: .\Driver\Timer\timer.h
+.\obj\main.o: .\Driver\SPI_OLED\oled.h
