@@ -1,11 +1,12 @@
 #include "DS18B20.h"
 #include "timer.h"	
 #include "delay.h"
-
-#define PROCESS_SUCCEED			(0)
-#define PROCESS_FAILURE			(-1)
+#include "util.h"
 
 #define USING_TIM3
+
+
+#define DS18B20_ERROR_CODE		(0x550)
 
 //IO方向设置
 #define DS18B20_IO_IN()  {GPIOG->CRH&=0XFFFF0FFF;GPIOG->CRH|=8<<12;}
@@ -181,9 +182,11 @@ u8 DS18B20_Init(void)
 //返回值：温度值 （-550~1250） 
 short DS18B20_Get_Temp(void)
 {
-    u8 temp;
     u8 TL,TH;
+	bool is_result_pos = false; //转换结果是否为正数
+	static short avail_sample_value = 0;
 	short tem;
+	short result;
     DS18B20_Start ();  			// ds1820 start convert
     DS18B20_Rst();
     DS18B20_Check();	 
@@ -191,19 +194,30 @@ short DS18B20_Get_Temp(void)
     DS18B20_Write_Byte(0xbe);	// convert	    
     TL=DS18B20_Read_Byte(); 	// LSB   
     TH=DS18B20_Read_Byte(); 	// MSB  
-	    	  
+	 
+	//负数
     if(TH>7)
     {
-        TH=~TH;
-        TL=~TL; 
-        temp=0;					//温度为负  
-    }else temp=1;				//温度为正	  	  
+        TH = ~TH;
+        TL = ~TL;
+		is_result_pos = false;		//温度为负  
+    }else {
+		is_result_pos = true;		//温度为正	
+	}  	  
     tem=TH; 					//获得高八位
     tem<<=8;    
     tem+=TL;					//获得底八位
-    tem=(float)tem*0.625;		//转换     
-	if(temp)return tem; 		//返回温度值
-	else return -tem;    
+	
+	if(tem != DS18B20_ERROR_CODE){
+		avail_sample_value = tem;
+	}
+	
+    result = (float)avail_sample_value * 0.625f;		//转换     
+	if(is_result_pos){
+		return result; 		//返回温度值
+	}else{
+		return -result;   
+	}
 }
 
 
