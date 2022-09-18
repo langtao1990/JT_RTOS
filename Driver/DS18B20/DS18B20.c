@@ -32,7 +32,7 @@ static void DS18B20_Rst(void)
 	timer_delay_us(15);    	
 #else 
 	delay_us(15);			//15US
-#endif  	
+#endif 
 }
 //等待DS18B20的回应
 //返回-1:未检测到DS18B20的存在
@@ -172,7 +172,7 @@ u8 DS18B20_Init(void)
  	GPIO_Init(GPIOG, &GPIO_InitStructure);
 
  	GPIO_SetBits(GPIOG,GPIO_Pin_11);    //输出1
-
+	
 	DS18B20_Rst();
 
 	return DS18B20_Check();
@@ -189,7 +189,9 @@ short DS18B20_Get_Temp(void)
 	short result;
     DS18B20_Start ();  			// ds1820 start convert
     DS18B20_Rst();
-    DS18B20_Check();	 
+
+    DS18B20_Check();
+	
     DS18B20_Write_Byte(0xcc);	// skip rom
     DS18B20_Write_Byte(0xbe);	// convert	    
     TL=DS18B20_Read_Byte(); 	// LSB   
